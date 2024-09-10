@@ -1,0 +1,168 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct Node 
+{
+int data;
+struct Node* left;
+struct Node* right;
+} 
+Node;
+typedef struct QueueNode
+{
+Node* treeNode;
+struct QueueNode* next;
+}
+QueueNode;
+typedef struct Queue 
+{
+QueueNode* front;
+QueueNode* rear;
+} 
+Queue;
+Node* createNode(int data) 
+{
+Node* newNode = (Node*)malloc(sizeof(Node));
+newNode->data = data;
+newNode->left = NULL;
+newNode->right = NULL;
+return newNode;
+}
+Node* insert(Node* root, int data) 
+{
+if (root == NULL)
+{
+return createNode(data);
+}
+if (data < root->data) 
+{
+root->left = insert(root->left, data);
+} 
+else
+{
+root->right = insert(root->right, data);
+}
+return root;
+}
+void printInOrder(Node* root) 
+{
+if (root == NULL)
+{
+return;
+}
+printInOrder(root->left);
+printf("%d ", root->data);
+printInOrder(root->right);
+}
+Node* mirror(Node* root)
+{
+if (root == NULL)
+{
+return NULL;
+}
+Node* newRoot = createNode(root->data);
+newRoot->left = mirror(root->right);
+newRoot->right = mirror(root->left);
+return newRoot;
+}
+void freeTree(Node* root)
+{
+if (root == NULL)
+{
+return;
+}
+freeTree(root->left);
+freeTree(root->right);
+free(root);
+}
+Queue* createQueue() 
+{
+Queue* queue = (Queue*)malloc(sizeof(Queue));
+queue->front = NULL;
+queue->rear = NULL;
+return queue;
+}
+void enqueue(Queue* queue, Node* node) 
+{
+QueueNode* newQueueNode = (QueueNode*)malloc(sizeof(QueueNode));
+newQueueNode->treeNode = node;
+newQueueNode->next = NULL;
+if (queue->rear == NULL) 
+{
+queue->front = newQueueNode;
+queue->rear = newQueueNode;
+}
+else
+{
+queue->rear->next = newQueueNode;
+queue->rear = newQueueNode;
+}
+}
+Node* dequeue(Queue* queue)
+{
+if (queue->front == NULL) 
+{
+return NULL;
+}
+QueueNode* temp = queue->front;
+Node* treeNode = temp->treeNode;
+queue->front = queue->front->next;
+if (queue->front == NULL) 
+{
+queue->rear = NULL;
+}
+free(temp);
+return treeNode;
+}
+int isQueueEmpty(Queue* queue)
+{
+return queue->front == NULL;
+}
+void levelOrderTraversal(Node* root)
+{
+if (root == NULL)
+{
+return;
+}
+Queue* queue = createQueue();
+enqueue(queue, root);
+while (!isQueueEmpty(queue)) 
+{
+Node* current = dequeue(queue);
+printf("%d ", current->data);
+if (current->left != NULL) 
+{
+enqueue(queue, current->left);
+}
+if (current->right != NULL) 
+{
+enqueue(queue, current->right);
+}
+}
+printf("\n");
+free(queue);
+}
+int main() 
+{
+Node* root = NULL;
+root = insert(root, 4);
+insert(root, 2);
+insert(root, 6);
+insert(root, 1);
+insert(root, 3);
+insert(root, 5);
+insert(root, 7);
+printf("Original Tree (In-order): ");
+printInOrder(root);
+printf("\n");
+Node* mirroredRoot = mirror(root);
+printf("Mirrored Tree (In-order): ");
+printInOrder(mirroredRoot);
+printf("\n");
+printf("Level-order Traversal of Original Tree: ");
+levelOrderTraversal(root);
+printf("Level-order Traversal of Mirrored Tree: ");
+levelOrderTraversal(mirroredRoot);
+freeTree(root);
+freeTree(mirroredRoot);
+return 0;
+}
